@@ -14,6 +14,8 @@ RUN emerge-webrsync \
 # The official installcd spec names a cdtar that entered catalyst after the
 # 4.1.1 release, so releng runs catalyst from git and the released package
 # lacks it. Pinned to the commit that added it; drop this once a release ships.
+# gitweb.gentoo.org answered 502 for a week from 2026-09-07, so the GitHub
+# mirror is the fallback; the checksum decides, not the host.
 ARG CDTAR_COMMIT=11967e5fb04b743fa02cad3ea7f0239896c9fd0a
 ARG CDTAR_SHA256=9bd3d05c6fb1428f5e50fed8bbad048fe495667f67cb9454461418163a9aa87f
 RUN cdtar=/usr/share/catalyst/livecd/cdtar/grub-theme-gentoo_frosted.tar.bz2 \
@@ -21,7 +23,8 @@ RUN cdtar=/usr/share/catalyst/livecd/cdtar/grub-theme-gentoo_frosted.tar.bz2 \
       echo "catalyst now ships the cdtar; remove this stage from the Dockerfile"; \
     else \
       wget -q -O "$cdtar" "https://gitweb.gentoo.org/proj/catalyst.git/plain/livecd/cdtar/grub-theme-gentoo_frosted.tar.bz2?id=${CDTAR_COMMIT}" \
-      && echo "${CDTAR_SHA256}  $cdtar" | sha256sum -c -; \
+      || wget -q -O "$cdtar" "https://raw.githubusercontent.com/gentoo/catalyst/${CDTAR_COMMIT}/livecd/cdtar/grub-theme-gentoo_frosted.tar.bz2"; \
+      echo "${CDTAR_SHA256}  $cdtar" | sha256sum -c -; \
     fi
 
 COPY . /repo
